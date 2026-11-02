@@ -156,6 +156,12 @@
   .cf-bar { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
   .cf-bar i { display: block; width: 100%; border-radius: 4px 4px 0 0; }
   .cf-v { margin-bottom: 0.3rem; font: 500 0.78rem/1.2 var(--font-mono); text-align: center; font-variant-numeric: tabular-nums; }
+  .cf-card.cf-anim .cf-bar i { transform: scaleY(0); transform-origin: bottom; transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .cf-card.cf-anim .cf-v { opacity: 0; transform: translateY(4px); transition: opacity 0.4s ease, transform 0.4s ease; }
+  .cf-card.cf-anim.in .cf-bar i { transform: scaleY(1); }
+  .cf-card.cf-anim.in .cf-v { opacity: 1; transform: none; }
+  .cf-card.cf-anim .cf-bar:nth-child(n) i, .cf-card.cf-anim .cf-bar:nth-child(n) .cf-v { transition-delay: calc(var(--i, 0) * 0.12s); }
+  .cf-card.cf-anim .cf-bar .cf-v { transition-delay: calc(var(--i, 0) * 0.12s + 0.6s); }
   .cf-bar.b0 i { background: color-mix(in srgb, var(--student) 30%, var(--surface)); }
   .cf-bar.b1 i { background: var(--student); }
   .cf-bar.a0 i { background: color-mix(in srgb, var(--teacher) 30%, var(--surface)); }
@@ -624,6 +630,22 @@
       </div>
       <figcaption><b>OPD gains with original and counterfactual teachers.</b> We report the student's average gain over the base model on the six benchmarks after 100 OPD steps for the two teacher models ($A$, $B$) and the transplanted models. $\tilde q^{\,B\leftarrow A}$ transplants $A$'s entropy shape onto $B$; $\tilde q^{\,A\leftarrow B}$ reverses the direction. For R1-Distill-1.5B, $B$ is the student itself and thus supplies no learning signal on its own.</figcaption>
     </figure>
+<script>
+// Bars grow from the baseline the first time the counterfactual chart scrolls into view.
+(function () {
+  var card = document.querySelector('.cf-card');
+  if (!card || !window.IntersectionObserver) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  [].forEach.call(card.querySelectorAll('.cf-plot'), function (plot) {
+    [].forEach.call(plot.querySelectorAll('.cf-bar'), function (b, i) { b.style.setProperty('--i', i); });
+  });
+  card.classList.add('cf-anim');
+  var io = new IntersectionObserver(function (es) {
+    if (es[0].isIntersecting) { io.disconnect(); requestAnimationFrame(function () { card.classList.add('in'); }); }
+  }, { threshold: 0.35 });
+  io.observe(card);
+})();
+</script>
   </section>
 
   <section class="wide" aria-label="Interactive figure: training dynamics of counterfactual teachers">
