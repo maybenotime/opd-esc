@@ -1,4 +1,5 @@
 name: Deploy project page
+# Publishes the page/ directory to GitHub Pages.
 
 on:
   push:
